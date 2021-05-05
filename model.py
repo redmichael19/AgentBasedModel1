@@ -4,9 +4,12 @@ Created on Tue Apr 27 20:32:16 2021
 
 @author: Michael
 """
+# KEY: Requires ' %matplotlib qt ' to be put in the console.
+# This allows the figures t be presented in pop out windows. 
+# Without this the code doesn't display outputs. 
+
 
 import random
-import operator
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot
@@ -22,13 +25,49 @@ import bs4
 num_of_agents = 200
 num_of_iterations = 40
 neighbourhood = 20
+
+# Creates an empty list for the agents to be stored in.
 agents = []
-
-
-# Read in raster environment data.
 
 # Creates an empty list for the environment data to be stored in. 
 environment = []
+
+
+# Function that runs the model. Will be used by the GUI.
+def run():
+    animation = matplotlib.animation.FuncAnimation(fig, update, interval=1, repeat=False, frames=num_of_iterations)
+    canvas.draw()
+
+
+# Function which updates the plot in the animation.
+# Includes the bulk of the agent code. 
+def update(frame_number):
+    fig.clear()
+
+# Prints to say iteration has begun.
+# Agent order is shuffled to avoid bias towards early agents in the list. 
+# Move the agents. 
+# Agents are sick after moving if they have 100 food in store.
+# Agents then eat.
+# Agents then share store. 
+# Prints to show each agents position and variables. 
+    print("Start of iteration " + str(frame_number + 1))
+    random.shuffle(agents)
+    for i in range(num_of_agents):
+        agents[i].move()
+        agents[i].sick()
+        agents[i].eat()
+        agents[i].share_with_neighbours(neighbourhood)
+        print(str(agents[i]))
+    
+  
+# Relates to the individual plots after each iteration. 
+    for i in range(num_of_agents):
+        matplotlib.pyplot.scatter(agents[i].x,agents[i].y)
+
+# Prints that an iteration has ended. 
+    print("End of iteration " + str(frame_number + 1))
+
 
 # Reads in the raster data from a file.
 # Appends rowlist to the environment list to create a 2D list.
@@ -52,42 +91,6 @@ content = r.text
 soup = bs4.BeautifulSoup(content, 'html.parser')
 td_ys = soup.find_all(attrs={"class" : "y"})
 td_xs = soup.find_all(attrs={"class" : "x"})
-
-
-# Function that runs the model. Will be used by the GUI.
-def run():
-    animation = matplotlib.animation.FuncAnimation(fig, update, interval=1, repeat=False, frames=num_of_iterations)
-    canvas.draw()
-
-
-# Function which updates the plot in the animation.
-# Includes the bulk of the agent code. 
-def update(frame_number):
-    fig.clear()
-
-# Prints to say iteration has begun.
-# Agent order is shuffled to avoid bias towards early agents in the list. 
-# Move the agents. 
-# Agents are sick after moving.
-# Agents then eat.
-# Agents then share store. 
-# Prints to show each agents position and variables. 
-    print("Start of iteration " + str(frame_number + 1))
-    random.shuffle(agents)
-    for i in range(num_of_agents):
-        agents[i].move()
-        agents[i].sick()
-        agents[i].eat()
-        agents[i].share_with_neighbours(neighbourhood)
-        print(str(agents[i]))
-    
-  
-# Relates to the individual plots after each iteration. 
-    for i in range(num_of_agents):
-        matplotlib.pyplot.scatter(agents[i].x,agents[i].y)
-
-# Prints that an iteration has ended. 
-    print("End of iteration " + str(frame_number + 1))
 
 
 # Animation figure parameters.
